@@ -1,0 +1,905 @@
+<html xmlns="http://www.w3.org/1999/xhtml" style="display: block;">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Welcome To Trust Investor Reporting</title>
+
+
+    <link rel="stylesheet" href="/tirResource/css/blueprint/screen.css" type="text/css" media="screen, projection">
+    <link rel="stylesheet" href="/tirResource/css/blueprint/print.css" type="text/css" media="print">
+    <link rel="stylesheet" href="/tirResource/js/vendor/shadowbox/shadowbox.css" type="text/css">
+    <link rel="stylesheet" href="/tirResource/css/redmond/jquery-ui-1.8.5.custom.css" type="text/css" media="screen, projection">
+    <link rel="stylesheet" href="/tirResource/css/jquery.qtip.min.css" type="text/css" media="screen, projection">
+    <link rel="stylesheet" href="/tirResource/css/datatable.css" type="text/css" media="screen, projection">
+    <link rel="stylesheet" href="/tirResource/css/style.css" type="text/css" media="screen, projection">
+    <link rel="stylesheet" href="/tirResource/css/tir.datatable.css" type="text/css" media="screen, projection">
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="/tirResource/js/blueprint/ie.css" type="text/css" media="screen, projection"/><![endif]-->
+
+
+    <script type="text/javascript" async="" src="https://cdn.appdynamics.com/adrum-ext.bb4998b9fa08203795298c5909e8245d.js"></script>
+    <script type="text/javascript" src="/tirResource/js/vendor/jquery-1.4.4.min.js"></script>
+    <script type="text/javascript" src="/tirResource/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/tirResource/js/vendor/jquery-ujs-driver.js"></script>
+    <script type="text/javascript" src="/tirResource/js/vendor/blockUI.js"></script>
+    <script type="text/javascript" src="/tirResource/js/vendor/jquery.clearinput.js"></script>
+    <script type="text/javascript" src="/tirResource/js/vendor/shadowbox/shadowbox.js"></script>
+    <script type="text/javascript" src="/tirResource/js/vendor/jquery.tools.min.js"></script>
+    <script type="text/javascript" src="/tirResource/js/vendor/jquery.tabslider.js"></script>
+    <script type="text/javascript" src="/tirResource/js/vendor/jquery.qtip.min.js"></script>
+    <script type="text/javascript" src="/tirResource/js/vendor/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="/tirResource/js/vendor/datatable.pagination.js"></script>
+    <script type="text/javascript" src="/tirResource/js/application.js"></script>
+    <script type="text/javascript" src="/tirResource/js/jquery.periodic-report-accordion.js"></script>
+
+    <style>html {
+        display: none;
+    }</style>
+    <script>if (self == top) {
+        document.documentElement.style.display = 'block';
+    } else {
+        top.location = self.location;
+    }</script>
+
+    <script type="text/javascript">
+        jQuery.ajaxSetup({
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('OWASP_CSRFTOKEN', '2TZG-YTBY-NJY5-5WBR-9NCZ-D3IF-IZNS-RZ5H');
+            },
+            dataFilter: function (data, type) {
+                if (type == 'json' && typeof (data) == 'string') {
+                    var obj = decHTML(data);
+                    return obj;
+                }
+                return data;
+            }
+        });
+
+        function decHTML(strValue) {
+            return strValue.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, '\'');
+        }
+    </script>
+    <script>
+
+
+        window.logoutPath = '/TIR/logout';
+    </script>
+    <script type="text/javascript" src="/tirResource/js/sessionManagement.js"></script>
+    <script>
+        $(function () {
+            new SessionManagementWidget(TIR.SessionOptions);
+        });
+    </script>
+
+    <script type="text/javascript">
+        var adrumAppKey = 'AD-AAB-AAN-ZTB';
+        if (adrumAppKey != 'null') {
+            window["adrum-app-key"] = adrumAppKey;
+        } else {
+            window["adrum-app-key"] = "DOES-NOT-MATTER";
+            window["adrum-disable"] = true;
+        }
+        if (typeof window.USBuser === 'undefined') {
+            // Define it
+            window.USBuser = {};
+        }
+        window.USBuser = {
+            screenName: 'tyohannan@usb',
+            company: 'Deer Park Road Corp',
+            emailAddress: 'backoffice@deerparkrd.com'
+        };
+    </script>
+
+    <script type="text/javascript" src="/tirResource/js/adrum-config.js"></script>
+    <script type="text/javascript" src="https://cdn.appdynamics.com/adrum/adrum-latest.js"></script>
+
+
+    <!--[if IE 6]>
+    <link rel="stylesheet" type="text/css" href="/tirResource/css/ie6.css"/>
+    <script type="text/javascript" src="/tirResource/js/ie6.js"></script>
+    <![endif]-->
+    <script type="text/javascript">
+        function refreshBulkdownloadDropbox() {
+
+            $('#bulk-download-spinner').show();
+
+            /*$('#bulk-download-drop-box-content-container').load('/TIR/public/bulkdownload/getdropbox', {cb: });*/
+            $.get('/TIR/public/bulkdownload/getdropbox', function (data) {
+                $('#bulk-download-drop-box-content-container').empty();
+                $('#bulk-download-drop-box-content-container').append(data);
+            });
+            $('#bulk-download-spinner').hide('fade');
+        }
+
+        function refreshFlashMessage() {
+            $('#flash-container').removeClass();
+            $('#flash-container').hide('blind');
+        }
+
+        $(function () {
+
+            //$("#issuerName").clearInput();
+            //$("#dealName").clearInput();
+            //$("#cusip").clearInput();
+
+            $("#issuerName").autocomplete({
+                source: "/TIR/public/deals/issuerLookup.json",
+                minLength: 2
+            });
+
+            $("#dealName").autocomplete({
+                source: "/TIR/public/deals/dealLookup.json",
+                minLength: 2
+            });
+
+            $("#cusip").autocomplete({
+                source: "/TIR/public/deals/cusipLookup.json",
+                minLength: 6
+            });
+
+            //add table tr color
+            $("tbody tr:even").css("background-color", "#f0f0f0");
+
+            //pagination pipes
+            $(".pagination li").each(function () {
+                if ($(this).hasClass("pagination-last") || $(this).hasClass("pagination-first")) {
+
+                } else {
+                    $(this).after("<li>|</li>");
+                }
+            });
+
+
+            //clear input
+            //$("input[type='text']").clearInput();
+
+
+            //select all portfolio
+            $('#select-all-link').click(function () {
+                if (selected == "all") {
+                    $('.remove-button-container input[name=addPortfolio]').show();
+                    $('.remove-button-container input[name=addPortfolio]').parent().children('.add-to-element').show();
+                    $('.remove-button-container input[name=addPortfolio]').parent().children('.remove-from-element').hide();
+                    selected = "";
+                } else {
+                    $('.remove-button-container input[name=addPortfolio]').hide();
+                    $('.remove-button-container input[name=addPortfolio]').parent().children('.add-to-element').hide();
+                    $('.remove-button-container input[name=addPortfolio]').parent().children('.remove-from-element').show();
+                    selected = "all";
+                }
+                return false;
+            });
+
+            //create portfolio tab link
+            $('#create-portfolio-link').click(function () {
+                Shadowbox.open({
+                    content: '<div id="inline-sample-content" style="z-index:999999"><div class="popup-header rounded-top"><a class="popup-close-button" onclick="Shadowbox.close();return false;" href="#">Close</a></div><div class="popup-content"><h1>Create a New Portfolio</h1><p class="span-18">To create a new portfolio tab, enter a name below and submit.</p><label for="name">Portfolio Name</label> &nbsp; <input type="text" name="portfolioName" id="name" /> &nbsp; <input id="new-portfolio-submit" class="blue-ui-button new-ui-button" type="button" onclick="Shadowbox.close();return false;" value="submit" /></div></div>',
+                    player: "html",
+                    height: 700,
+                    width: 784
+                });
+            });
+
+        });
+
+        function updateInboxCount() {
+
+            $.getJSON('/TIR/inbox/getUnReadInboxCount', function (data) {
+                $("#inbox-msg-count").text(data.count > 0 ? "(" + data.count + ")" : "");
+            });
+        }
+
+    </script>
+</head>
+<body id="deals-detail">
+
+<div class="container">
+
+    <div class="span-24" id="siteHeader">
+
+        <div class="span-24">
+
+
+            <div class="user_menu">
+                <ul class="nav-horizontal-right last">
+                    <li><h3>Welcome</h3></li>
+
+                    <li class="nav-horizontal-right-border">Cathy Glynn</li>
+                    <li class="nav-horizontal-right-border">
+
+                        <a href="/TIR/logout">Sign Out</a>
+                    </li>
+
+                    <li class="nav-horizontal-right-border"><a href="/TIR/subscribers/profile">My Account</a></li>
+
+                    <li class="nav-horizontal-right-border"><a href="#" onclick="showAnnualCertification(false);">Certification</a></li>
+
+
+                    <li class="nav-horizontal-right-border">
+
+                        <a href="/TIR/appinfo/userGuide" target="_blank">User Guide</a>
+                    </li>
+                    <li id="releaseNotes" class="nav-horizontal-right-border" style="display: none">
+
+                        <a href="/TIR/appinfo/releaseNotes" target="_blank">Release Notes</a>
+                    </li>
+
+                    <li><a href="/TIR/public/contactus">Contact Us</a></li>
+                </ul>
+            </div>
+            <div class="align-left header_logo">
+                <img src="/tirResource/images/logo-usbank-siteheader.png" height="90" id="siteLogo" alt="U.S. Bank">
+            </div>
+            <div class="align-left banner-text header_title">
+                Trust Investor Reporting
+            </div>
+        </div>
+
+
+        <div class="span-24 last" id="nav-main">
+            <ul class="nav-main last">
+
+                <li id="search-for-deals-nav-tab" class="nav-main-tab"><a href="/TIR/public/deals/">Search For Deals</a></li>
+
+                <li id="inbox-nav-tab" class="nav-main-tab"><a id="inbox_anchor" href="/TIR/inbox/">
+                    Inbox
+                    <span id="inbox-msg-count"></span></a></li>
+
+                <li id="portfolio-nav-tab" class="nav-main-tab"><a href="/TIR/portfolios/myPortfolio">My Portfolio</a></li>
+
+                <li id="new-deals-nav-tab" class="nav-main-tab"><a href="/TIR/public/newdeals/init">New Deals</a></li>
+
+                <li id="cml-nav-tab" class="nav-main-lastItem"><a href="/TIR/cashmanagedloans/cashreports/">Cash Managed Loans</a></li>
+
+            </ul>
+        </div>
+    </div>
+
+
+    <div id="flash-container" style="display: none;"></div>
+
+
+    <!-- content -->
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $('#dialog-portfoliolist').hide();
+            $('#updateResultDialog').hide();
+            $('#promptToLogin').hide();
+            $('#dialog_duplicaterecord').hide();
+
+            $('#addToPortfolio_Anonymous').click(function () {
+                if ($(this).attr('checked')) {
+                    $("#promptToLogin").html("<p>Please log-in to add deal to portfolio.</p>").dialog({
+                        buttons: {
+                            "OK": function (e) {
+                                $(this).dialog("close");
+                                $('#addToPortfolio_Anonymous').attr('checked', false);
+                            }
+                        }
+                    });
+                }
+
+            });
+
+            $('#addToPortfolio').click(function (e) {
+                e.preventDefault();
+                if ($(this).attr('checked')) {
+                    var portfoliolistURL = "/TIR/portfolios/get-portfolios";
+                    var currentDealId = '10025';
+                    $.ajax({
+                        type: 'GET',
+                        url: portfoliolistURL,
+                        success: function (data) {
+                            var $dialog = $('#dialog-portfoliolist').html(data).dialog({
+                                autoOpen: false,
+                                height: 400,
+                                width: 400,
+                                modal: true,
+                                draggable: false,
+                                closeOnEscape: true,
+                                buttons: {
+                                    "Add": function () {
+                                        var toPortfolio = $('#portfolio-selector').val();
+                                        var addDealsURL = "/TIR/portfolios/addDealToPortfolio?portfolioId=" + toPortfolio + "&dealId=" + currentDealId;
+                                        $.ajax({
+                                            type: 'POST',
+                                            url: addDealsURL,
+                                            success: function (data) {
+                                                $("#updateResultDialog").html("<p>Deal added to the selected portfolio.</p>").dialog({
+                                                    buttons: {
+                                                        "OK": function (e) {
+                                                            $(this).dialog("close");
+                                                        }
+                                                    }
+                                                });
+                                                $('#addToPortfolio').attr('checked', false);
+                                            },
+                                            error: function (jqXHR, textStatus, errorThrown) {
+                                                $("#dialog_duplicaterecord").html("<p>Deal already exist in the selected Portfolio.</p>").dialog({
+                                                    buttons: {
+                                                        "OK": function (e) {
+                                                            $(this).dialog("close");
+
+                                                        }
+                                                    }
+                                                });
+                                                $('#addToPortfolio').attr('checked', false);
+                                            }
+                                        });
+                                        $(this).dialog("close");
+                                    },
+                                    "Cancel": function () {
+                                        $(this).dialog("close");
+                                        $('#addToPortfolio').attr('checked', false);
+                                    }
+                                } // END modal buttons
+                            });
+                            $dialog.dialog('open');
+                        }
+                    }); // END ajax
+                }
+            });
+
+            $("a.lnk_prompt_login").click(function (event) {
+                event.preventDefault();
+                $("#promptToLogin").html("<p>Please log-in to access the selected page.</p>")
+                    .dialog(
+                        {
+                            buttons: {
+                                "OK": function (e) {
+                                    var dealDetailURL = "/TIR/public/deals/detail/10025/Merrill Lynch Series 2007-HE2";
+                                    $.get(dealDetailURL);
+                                    $(this).dialog("close");
+                                }
+                            }
+                        }
+                    );
+                return false;
+            });
+
+
+        });
+    </script>
+
+    <div class="span-24 prepend-top">
+        <h1>Merrill Lynch Series 2007-HE2
+            <a href="null">Back to Search Results</a></h1>
+
+    </div>
+
+    <div class="span-18">
+        <div class="top-content">
+
+            <script type="text/javascript">
+                $(document).ready(function () {
+                    $('#button-pusher').click(function () {
+                        $('#theblock').animate({'left': '+=50px'}, 'fast');
+                    });
+                });
+            </script>
+
+            <div class="detailHeaderContainer">
+                <div class="leftBlock">
+                    <div class="left staticlabel leftStaticlabelWidth inlineColumn">
+                        <label>
+                            Privacy:
+                        </label>
+                    </div>
+                    <div class="left leftDynamiclabelWidth dynamiclabel">
+                        <label>Public</label>
+                    </div>
+                    <div class="clear"></div>
+
+                    <div class="left staticlabel leftStaticlabelWidth inlineColumn">
+                        <label>
+                            Product Type:
+                        </label>
+                    </div>
+                    <div class="left leftDynamiclabelWidth dynamiclabel">
+                        <label>ABS/MBS</label>
+                    </div>
+                    <div class="clear"></div>
+
+                    <div class="left staticlabel leftStaticlabelWidth inlineColumn">
+                        <label>
+                            Termination Date:
+                        </label>
+                    </div>
+                    <div class="left leftDynamiclabelWidth dynamiclabel">
+                        <label></label>
+                    </div>
+                    <div class="clear"></div>
+
+                    <div class="left staticlabel leftStaticlabelWidth inlineColumn">
+                        <label>
+                            Recent Report Date:
+                        </label>
+                    </div>
+                    <div class="left leftDynamiclabelWidth dynamiclabel">
+                        <label>04/25/2023</label>
+                    </div>
+                    <div class="clear"></div>
+
+
+                </div>
+                <div class="middleBlock">
+                    <br>
+                </div>
+                <div class="rightBlock">
+                    <div class="left staticlabel rightStaticlabelWidth inlineColumn">
+                        <label>
+                            Contact:
+                        </label>
+                    </div>
+                    <div class="left rightDynamiclabelWidth dynamiclabel">
+                        <label>Millard Southern</label>
+                    </div>
+                    <div class="clear"></div>
+
+                    <div class="left staticlabel rightStaticlabelWidth inlineColumn">
+                        <label>
+                            Phone:
+                        </label>
+                    </div>
+                    <div class="left rightDynamiclabelWidth dynamiclabel">
+                        <label>(312)-332-7497</label>
+                    </div>
+                    <div class="clear"></div>
+
+                    <div class="left staticlabel rightStaticlabelWidth inlineColumn">
+                        <label>
+                            Email:
+                        </label>
+                    </div>
+                    <div class="left rightDynamiclabelWidth dynamiclabel">
+                        <label><a href="mailto:millard.southern@usbank.com">millard.southern@usbank.com</a></label>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="left staticlabel inlineColumn">
+
+
+                        <label>Add to Portfolio:</label>
+                        <input class="deal-selector-checkbox" type="checkbox" name="selected-deals" id="addToPortfolio" value="10025">
+
+
+                    </div>
+                    <div class="left rightDynamiclabelWidth dynamiclabel">
+
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="clear"></div>
+            </div>
+        </div>
+        <div><p></p></div>
+        <input type="hidden" value="10025" id="dealId">
+        <input type="hidden" value="Merrill Lynch Series 2007-HE2" id="dealName" class="ui-autocomplete-input" autocomplete="off" role="textbox" aria-autocomplete="list" aria-haspopup="true">
+
+
+        <div id="tabs" class="ui-tabs ui-widget ui-widget-content ui-corner-all">
+            <ul id="deal-tabs" class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">
+
+
+                <li style="margin-bottom: 5px;" class="ui-state-default ui-corner-top ui-tabs-selected ui-state-active ui-state-processing">
+
+
+                    <a id="periodic_report" href="#ui-tabs-1">
+                        Periodic Reports
+                    </a>
+                </li>
+
+
+                <li style="margin-bottom: 5px;" class="ui-state-default ui-corner-top">
+
+
+                    <a id="periodic_report" href="#ui-tabs-2">
+                        Periodic Reports - Secured
+                    </a>
+                </li>
+
+
+                <li style="margin-bottom: 5px;" class="ui-state-default ui-corner-top">
+
+
+                    <a href="#ui-tabs-3">Deal Documents</a>
+                </li>
+
+
+                <li style="margin-bottom: 5px;" class="ui-state-default ui-corner-top">
+                    <a href="#ui-tabs-4">
+                        P &amp; I Factors
+                    </a>
+                </li>
+
+
+                <li style="margin-bottom: 5px;" class="ui-state-default ui-corner-top">
+
+
+                    <a href="#ui-tabs-5">Tax Factors</a>
+                </li>
+
+
+                <li style="margin-bottom: 5px;" class="ui-state-default ui-corner-top">
+
+
+                    <a href="#ui-tabs-6">Investor Notices</a>
+                </li>
+
+
+            </ul>
+            <div id="ui-tabs-1" class="ui-tabs-panel ui-widget-content ui-corner-bottom"></div>
+            <div id="ui-tabs-2" class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide"></div>
+            <div id="ui-tabs-3" class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide"></div>
+            <div id="ui-tabs-4" class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide"></div>
+            <div id="ui-tabs-5" class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide"></div>
+            <div id="ui-tabs-6" class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide"></div>
+
+
+            <div id="tabs-9">
+
+            </div>
+        </div>
+    </div>
+    <!-- /content -->
+    <div id="dialog-portfoliolist" title="portfolios list" style="display: none;"></div>
+    <div id="updateResultDialog" title="Add Deals to Portfolio" style="display: none;"></div>
+    <div id="promptToLogin" title="Login Required" style="display: none;"></div>
+    <div id="dialog_duplicaterecord" title="Record already exist" style="display: none;"></div>
+
+    <script type="text/javascript">
+
+
+        // TODO KG 08/30/11 in select start the spinner and remove it in load
+        var $tabs;
+        $(document).ready(function () {
+            $tabs = $("#tabs")
+                .tabs({
+                    cache: true,
+                    fx: {duration: 'fast', opacity: 'toggle'},
+                    select: function (event, ui) {
+                        var panel = $(ui.panel);
+                        if (panel.is(":empty"))
+                            panel.html('<p><h3><img src="/tirResource/images/pinwheel.gif"/> Loading Contents...<h3></p>');
+                    }
+                });//End tabs
+
+            //$('#deal-tabs').TabSlider();
+        });
+
+        var shelved_state = new Array();
+
+        $(function () {
+            $(".drag-handle").draggable({
+                revert: true,
+                helper: "clone",
+                start: function (event, ui) {
+                    //is this draggable element checked?
+                    var sibling_checkbox = $(this).parent().children(':checkbox');
+                    var sibling_checkbox_checked = $(sibling_checkbox).is(':checked');
+                    var checked_count = $('#deal-list input:checked').length;
+
+                    //we will fall into three states:
+                    //nothing is checked:
+                    if (checked_count == 0) {
+                        //No report has been selected, so let's select the checkbox for this report.
+                        $(sibling_checkbox).attr('checked', true);
+                    } else if (checked_count > 0 && !sibling_checkbox_checked) {
+                        //we are selecting a new element outside the group we already selected:
+                        //preserve state of currently selected && reset checkboxes
+                        shelved_state = new Array();
+                        $('#deal-list input:checked').each(function (index, element) {
+                            $(element).attr('checked', false);
+                            shelved_state.push($(element).val());
+                        });
+                        //add the newly selected attribute.
+                        $(sibling_checkbox).attr('checked', true);
+                    }
+
+                    var checked_count = $('#deal-list input:checked').length;
+                    $(ui.helper).addClass('drag-helper-active');
+
+                    $(ui.helper).html('Moving ' + checked_count + ' Deal' + (checked_count > 1 ? 's' : ''));
+                },
+                stop: function (event, ui) {
+                    //check shelved state and see if it is holding values.
+                    if (shelved_state.length > 0) {
+                        //reset back to the original state.
+                        $('input:checked').each(function (index, element) {
+                            $(element).attr('checked', false);
+                        });
+
+                        $(shelved_state).each(function (index, value) {
+                            $('input:checkbox[value=' + value + ']').attr('checked', true);
+                        });
+
+                        //clear state.
+                        shelved_state = new Array();
+                    }
+                },
+                cursorAt: {cursor: "move"}
+            });
+
+            $("#bulk-download-drop-box").droppable({
+                activate: function (event, ui) {
+                    $("#bulk-download-drop-box-header").addClass('bulk-download-drop-box-header-active');
+                    $("#bulk-download-drop-box-content").addClass('bulk-download-drop-box-content-active');
+                },
+                deactivate: function (event, ui) {
+                    $("#bulk-download-drop-box-header").removeClass('bulk-download-drop-box-header-active');
+                    $("#bulk-download-drop-box-content").removeClass('bulk-download-drop-box-content-active');
+                },
+                drop: function (event, ui) {
+                    $('#deal-list').submit();
+                }
+            });
+        });
+    </script>
+
+
+    <!-- side content div -->
+    <div class="span-6 last">
+
+
+        <div id="search-container" class="span-5">
+            <div class="pad-bottom-quarter sub-content-header background-gradient-ltBlue bordered-ltBlue rounded-top pad-half side-content-width" style="width: 188px;"> Search</div>
+            <div class="sub-content pad-half bordered side-content-width" style="width: 188px;">
+
+                <form id="deal-search" action="/TIR/public/dealList/search" method="GET">
+                    Select Product Type
+                    <select id="productType" name="productType" class="tirSerarchSelect" onchange="javascript:refreshFlashMessage();">
+                        <option value="-1">ALL</option>
+                        <option value="2">ABS/MBS</option>
+                        <option value="3">CDO</option>
+                        <option value="5">CMBS</option>
+                        <option value="8">Warehouse Facility</option>
+                        <option value="9">Corp/Muni</option>
+                        <option value="16">Loan Note Issuance</option>
+                        <option value="19">DCSW</option>
+                        <option value="21">Tax Lien</option>
+                        <option value="23">CDOMO</option>
+                        <option value="24">FSAI</option>
+                        <option value="25">Unknown</option>
+                        <option value="26">Doc Mgmt</option>
+                        <option value="27">Doc Mgmt</option>
+                        <option value="31">Conventional Debt</option>
+                    </select>
+                    Issuer Name(contains)
+                    <input id="issuerName" name="issuerName" class="tirSerarchText ui-autocomplete-input" onchange="javascript:refreshFlashMessage();" type="text" value="" autocomplete="off" role="textbox" aria-autocomplete="list" aria-haspopup="true">
+                    Deal Name
+                    <input id="dealName" name="dealName" class="tirSerarchText" onchange="javascript:refreshFlashMessage();" type="text" value="">
+                    CUSIP
+                    <input id="cusip" name="cusip" class="tirSerarchText ui-autocomplete-input" onchange="javascript:refreshFlashMessage();" type="text" value="" autocomplete="off" role="textbox" aria-autocomplete="list" aria-haspopup="true">
+                    <input id="originatingButton" name="originatingButton" type="hidden" value="">
+                    <input class="blue-ui-button new-ui-button" type="submit" value="Search" onclick="document.getElementById('originatingButton').value='deal';">&nbsp;&nbsp;
+                    <input id="search-all-deals" class="blue-ui-button new-ui-button" type="submit" value="All Deals" onclick="document.getElementById('originatingButton').value='allDeals';">
+                    <input type="hidden" id="OWASP_CSRFTOKEN" name="OWASP_CSRFTOKEN" value="2TZG-YTBY-NJY5-5WBR-9NCZ-D3IF-IZNS-RZ5H">
+
+
+                </form>
+            </div>
+        </div>
+
+
+        <div id="bulk-download-drop-box" class="span-5 prepend-top ui-droppable">
+            <div id="bulk-download-drop-box-header" class="pad-bottom-quarter sub-content-header background-gradient-ltBlue bordered-ltBlue rounded-top pad-half side-content-width" style="width: 188px;"> Bulk Download <img id="bulk-download-spinner" src="/tirResource/images/pinwheel.gif" width="18px" height="18px" style="display: none;"></div>
+            <div id="bulk-download-drop-box-content" class="sub-content pad-half bordered side-content-width" style="width: 188px;">
+                <div id="bulk-download-drop-box-content-container">
+
+
+                    <table id="bulk-download-table" cellpadding="0" cellspacing="0">
+
+                        <tbody>
+
+
+                        <tr class="placeholder">
+                            <td colspan="2">
+                                <p>You have not added any items to your bulk download list.</p>
+                            </td>
+                        </tr>
+
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <td>
+                                <input id="view-bulkdownload-list-button2" class="blue-ui-button new-ui-button usb-ui-button-disabled" type="button" value="Continue" disabled="true">
+
+                            </td>
+                        </tr>
+                        </tfoot>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="span-5 prepend-top">
+            <div class="pad-bottom-quarter sub-content-header background-gradient-ltBlue bordered-ltBlue rounded-top pad-half side-content-width" style="width: 188px;"> Related Links</div>
+            <div class="sub-content pad-half bordered side-content-width" style="width: 188px;">
+                <div><a target="_blank" href="http://www.usbank.com/cgi_w/cfm/commercial_business/products_and_services/corp_trust/bondholder_info_ps.cfm">Bondholder Services</a></div>
+                <div><a target="_blank" href="http://www.usbank.com/cgi_w/cfm/commercial_business/products_and_services/corp_trust/comm_bus_corp_trust_ps.cfm">Corporate Trust</a></div>
+                <div><a href="mailto:resolution.center@usbank.com">Trust Resolution Center</a></div>
+                <div><a target="_blank" href="https://trustnowessentials.usbank.com/TNE/login.go">TrustNow Essentials</a></div>
+                <div><a target="_blank" href="https://singlepoint.usbank.com/cs70_banking/logon/sbuser">SinglePoint</a></div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="text/javascript" src="/tirResource/js/annualCert.js"></script>
+
+    <div id="annualCertDialog" style="display:none;">
+        <h1>TIR Annual Certification</h1>
+        <p>In compliance with U.S. Bank policy this is an annual review of users authorized to access private deals/entitlements on the Trust Investor Reporting application. You are being directed to this page as you are listed as a user who has access to one or more of these deals. Please review the access listed below and respond accordingly whether access is still required. If you do not complete this review your access access will be removed. The due date for this review is October 31st.
+            <br><br>Please direct any questions or concerns to the Technology Service Center at 1-866-252-4360. Representatives are available to help you 24 hours a day, Monday through Friday.</p>
+        <div style="display:none;" id="annualCert-msg"></div>
+        <div>
+            <table id="annualCert-table" class="span-20">
+                <thead>
+                <tr>
+                    <th style="width:41%">Deal Name</th>
+                    <th style="width:13%">Access valid until</th>
+                    <th style="width:13%">Date Certified</th>
+                    <th style="width:13%">Date Declined</th>
+                    <th style="width:10%">Accept<br></th>
+                    <th style="width:10%">Decline<br></th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <img id="annualCert-action-spinner" style="display: none;" src="/tirResource/images/pinwheel.gif">
+    </div>
+
+    <div id="annualCertNotifyDialog" style="display:none;">
+        <h1>Expiration of Deal Access</h1>
+        <p>In compliance with U.S. Bank policy, access to all private deals on the Trust Investor Reporting (TIR) website requires annual recertification. This year's annual recertification period began on October 1st and concluded on October 31st. Access has now been removed for any private deal for which you did not recertify during this period. If you require access to any such deal, please submit a new request for access through its deal page. Your recertification status can always be found
+            on the Certification link at the top of the website.<br><br>Please direct any questions or concerns to the Technology Service Center at 1-866-252-4360. Representatives are available to help you 24 hours a day, Monday through Friday.</p>
+    </div>
+
+
+    <div class="span-24" id="page-footer">
+        <div class="span-12 rib-footer-left">
+            <span>©&nbsp;2023 U.S. Bancorp</span>
+            <span class="footer-padded-text">Member FDIC</span><br>
+            <span class="span-24">©&nbsp;2023 American Bankers Association.  CUSIP Database provided by Standard &amp; Poors Financial Services LLC.  All rights reserved</span>
+            <span class="footer-padded-text">null</span>
+        </div>
+        <div class="span-12 last rib-footer-right">
+            <span><a class="nav-horizontal-right-border" href="http://www.usbank.com/cgi_w/cfm/about/privacy/privacy_pledge.cfm">Privacy Pledge</a></span>
+
+            <span><a href="/TIR/public/legaldisclaimer">Terms of Service / Legal Agreement</a></span>
+        </div>
+    </div>
+
+
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        updateInboxCount();
+
+        Shadowbox.init({
+            overlayColor: '#FFFFFF',
+            overlayOpacity: '.7',
+            animate: false
+        });
+
+        refreshBulkdownloadDropbox();
+
+        $.ajax({
+            url: "/TIR/appinfo/countReleaseNotes",
+            dataType: "json",
+            success: function (data) {
+                if (data > 0) {
+                    $('#releaseNotes').show();
+                }
+            }
+        });
+
+        var annualCertPeriod = null;
+        if (annualCertPeriod) {
+            new TIR.AnnualCert().draw(true, annualCertPeriod);
+
+            $("#annualCertDialog").dialog({
+                height: 600,
+                width: 835,
+                modal: true,
+                close: function (event, ui) {
+                    completeCertification();
+                }
+            });
+        }
+
+        var annualCertNotify = null;
+        if (annualCertNotify) {
+            $("#annualCertNotifyDialog").dialog({
+                height: 450,
+                width: 450,
+                modal: true,
+                buttons: [
+                    {
+                        text: "OK",
+                        click: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                ],
+                close: function (event, ui) {
+                    updateAnnualCertifyNotify();
+                }
+            });
+        }
+    });
+</script>
+<script type="text/javascript" src="/vYSrdVoTyH-adxZ80nWR3nXv/3DNY2czSOm/exMUAS0/VnlySyA/sOAk"></script>
+<div id="dialog"></div>
+<ul class="ui-autocomplete ui-menu ui-widget ui-widget-content ui-corner-all" role="listbox" aria-activedescendant="ui-active-menuitem" style="z-index: 1; top: 0px; left: 0px; display: none;"></ul>
+<ul class="ui-autocomplete ui-menu ui-widget ui-widget-content ui-corner-all" role="listbox" aria-activedescendant="ui-active-menuitem" style="z-index: 1; top: 0px; left: 0px; display: none;"></ul>
+<ul class="ui-autocomplete ui-menu ui-widget ui-widget-content ui-corner-all" role="listbox" aria-activedescendant="ui-active-menuitem" style="z-index: 1; top: 0px; left: 0px; display: none;"></ul>
+<div id="sb-container">
+    <div id="sb-overlay"></div>
+    <div id="sb-wrapper">
+        <div id="sb-title">
+            <div id="sb-title-inner"></div>
+        </div>
+        <div id="sb-wrapper-inner">
+            <div id="sb-body">
+                <div id="sb-body-inner"></div>
+                <div id="sb-loading">
+                    <div id="sb-loading-inner"><span>loading</span></div>
+                </div>
+            </div>
+        </div>
+        <div id="sb-info">
+            <div id="sb-info-inner">
+                <div id="sb-counter"></div>
+                <div id="sb-nav"><a id="sb-nav-close" title="Close" onclick="Shadowbox.close()"></a><a id="sb-nav-next" title="Next" onclick="Shadowbox.next()"></a><a id="sb-nav-play" title="Play" onclick="Shadowbox.play()"></a><a id="sb-nav-pause" title="Pause" onclick="Shadowbox.pause()"></a><a id="sb-nav-previous" title="Previous" onclick="Shadowbox.previous()"></a></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="ui-dialog ui-widget ui-widget-content ui-corner-all  ui-draggable ui-resizable" tabindex="-1" role="dialog" aria-labelledby="ui-dialog-title-bulk-download-full-list" style="display: none; z-index: 1000; outline: 0px; position: relative;">
+    <div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix"><span class="ui-dialog-title" id="ui-dialog-title-bulk-download-full-list">Bulk Download</span><a href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button"><span class="ui-icon ui-icon-closethick">close</span></a></div>
+    <div id="bulk-download-full-list" style="" class="ui-dialog-content ui-widget-content">
+        <div id="inline-sample-content">
+
+            <p class="span-18">
+                The table below shows all bulk downloads you have selected.
+            </p>
+            <div style="clear: both;"></div>
+            <div>
+                <a class="button form-action-button ui-corner-all" href="/TIR/public/bulkdownload/doDownload">Start Download</a>
+                <a href="/TIR/public/bulkdownload/reset" class="button form-action-button ui-corner-all">Clear Bulkdownload</a>
+                <a id="close-bulkdownload-dialog_top" href="#" class="button form-action-button ui-corner-all">Close</a>
+                <br><br>
+                <table cellpadding="0" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <td> Report Name</td>
+                        <td> Format &nbsp;&nbsp;</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+                <a class="button form-action-button ui-corner-all" href="/TIR/public/bulkdownload/doDownload">Start Download</a>
+                <a href="/TIR/public/bulkdownload/reset" class="button form-action-button ui-corner-all">Clear Bulkdownload</a>
+                <a id="close-bulkdownload-dialog_bottom" href="#" class="button form-action-button ui-corner-all">Close</a>
+            </div>
+        </div>
+    </div>
+    <div class="ui-resizable-handle ui-resizable-n"></div>
+    <div class="ui-resizable-handle ui-resizable-e"></div>
+    <div class="ui-resizable-handle ui-resizable-s"></div>
+    <div class="ui-resizable-handle ui-resizable-w"></div>
+    <div class="ui-resizable-handle ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se ui-icon-grip-diagonal-se" style="z-index: 1001;"></div>
+    <div class="ui-resizable-handle ui-resizable-sw" style="z-index: 1002;"></div>
+    <div class="ui-resizable-handle ui-resizable-ne" style="z-index: 1003;"></div>
+    <div class="ui-resizable-handle ui-resizable-nw" style="z-index: 1004;"></div>
+</div>
+</body>
+</html>
