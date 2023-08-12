@@ -18,8 +18,8 @@ class DeutscheBankBrowser {
 
     public Page $page;
     const NETWORK_IDLE_MS_TO_WAIT    = 4000; // This was too short. So I removed it from usage.
-    const BROWSER_WINDOW_SIZE_WIDTH  = 1000;
-    const BROWSER_WINDOW_SIZE_HEIGHT = 5000;
+    const BROWSER_WINDOW_SIZE_WIDTH  = 1250;
+    const BROWSER_WINDOW_SIZE_HEIGHT = 768;
     const BROWSER_ENABLE_IMAGES      = TRUE;
     const USER_AGENT_STRING          = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.83 Safari/537.36';
 

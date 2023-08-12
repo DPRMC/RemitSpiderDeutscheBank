@@ -17,6 +17,9 @@ class Debug {
     protected bool   $debug;
     protected string $timezone;
 
+    const CLIP_DEFAULT_HEIGHT = DeutscheBankBrowser::BROWSER_WINDOW_SIZE_HEIGHT;
+    const CLIP_DEFAULT_WIDTH  = DeutscheBankBrowser::BROWSER_WINDOW_SIZE_WIDTH;
+
     public function __construct( Page   &$page,
                                  string $pathToScreenshots = '',
                                  bool   $debug = FALSE,
@@ -41,7 +44,7 @@ class Debug {
     /**
      * This is just a little helper function to clean up some debug code.
      *
-     * @param string                      $suffix
+     * @param string $suffix
      * @param \HeadlessChromium\Clip|NULL $clip
      *
      * @return void
@@ -50,20 +53,20 @@ class Debug {
      * @throws \HeadlessChromium\Exception\ScreenshotFailed
      */
     public function _screenshot( string $suffix, Clip $clip = NULL ) {
-
+        if ( ! $this->debug ):
+            return;
+        endif;
         $now   = Carbon::now( $this->timezone );
         $time  = $now->timestamp;
         $micro = $now->microsecond;
 
-        if ( $this->debug ):
-            if ( $clip ):
-                $this->page->screenshot( [ 'clip' => $clip ] )
-                           ->saveToFile( $this->pathToScreenshots . $time . '_' . $micro . '_' . $suffix . '.jpg' );
-            else:
-                $this->page->screenshot()
-                           ->saveToFile( $this->pathToScreenshots . $time . '_' . $micro . '_' . $suffix . '.jpg' );
-            endif;
+        if ( is_null( $clip ) ):
+            $clip = new Clip( 0, 0, self::CLIP_DEFAULT_WIDTH, self::CLIP_DEFAULT_HEIGHT, 1 );
         endif;
+
+        $this->page->screenshot( [ 'clip' => $clip ] )
+                   ->saveToFile( $this->pathToScreenshots . $time . '_' . $micro . '_' . $suffix . '.jpg' );
+
     }
 
 

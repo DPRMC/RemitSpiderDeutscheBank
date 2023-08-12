@@ -13,12 +13,14 @@ class RemitSpiderDeutscheBankTest extends TestCase {
 
 
     private function _getSpider(): \DPRMC\RemitSpiderDeutscheBank\RemitSpiderDeutscheBank {
+
+
         return new \DPRMC\RemitSpiderDeutscheBank\RemitSpiderDeutscheBank( $_ENV[ 'CHROME_PATH' ],
-                                                              $_ENV[ 'USER' ],
-                                                              $_ENV[ 'PASS' ],
+                                                              $_ENV[ 'CUSTODIAN_USER' ],
+                                                              $_ENV[ 'CUSTODIAN_PASS' ],
                                                               self::$debug,
-                                                              '/Users/michaeldrennen/Desktop/files',
-                                                              '/Users/michaeldrennen/Desktop/files',
+                                                              '/Users/michaeldrennen/Desktop/files/',
+                                                              '/Users/michaeldrennen/Desktop/files/',
                                                               self::TIMEZONE );
     }
 

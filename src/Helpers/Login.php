@@ -16,8 +16,11 @@ class Login {
     const URL_LOGIN  = 'https://tss.sfs.db.com/search';
     const URL_LOGOUT = 'https://identity.db.com/auth/realms/global/protocol/openid-connect/logout';
 
-    const LOGIN_BUTTON_X = 80;
-    const LOGIN_BUTTON_Y = 260;
+    const LOGIN_LINK_BUTTON_Y = 140;
+    const LOGIN_LINK_BUTTON_X = 1200;
+
+    const LOGIN_BUTTON_X = 460;
+    const LOGIN_BUTTON_Y = 390;
 
 
 //    const URL_INTERFACE = RemitSpiderDeutscheBank::BASE_URL . '/TIR/public/deals';
@@ -54,24 +57,47 @@ class Login {
 
 
     public function login(): string {
-        $this->Debug->_debug( "Navigating to login screen." );
-        $this->Page->navigate( self::URL_LOGIN )->waitForNavigation();
+        $this->Debug->_debug( "Navigating to login screen at: " . self::URL_LOGIN );
+        $this->Page->navigate( self::URL_LOGIN )->waitForNavigation(Page::NETWORK_IDLE);
+        sleep(5);
 
-        $this->Debug->_screenshot( 'first_page' );
+        $this->Debug->_screenshot( 'start_page' );
+        $this->Debug->_html( 'start_page' );
+
+        $this->Debug->_debug( "Deleting the overlay" );
+        $this->Page->evaluate("document.querySelector('.jss338').remove();");
+
+        $this->Debug->_screenshot( 'page_without_overlay' );
+        $this->Debug->_html( 'page_without_overlay' );
+
+        $this->Debug->_debug( "Clicking Login button." );
+
+        $this->Debug->_screenshot( 'where_i_clicked_to_login', new Clip( 0, 0, self::LOGIN_LINK_BUTTON_X, self::LOGIN_LINK_BUTTON_Y ) );
+
+        $this->Page->mouse()
+                   ->move( self::LOGIN_LINK_BUTTON_X, self::LOGIN_LINK_BUTTON_Y )
+                   ->click();
+
+        $this->Page->waitForReload();
+
+        $this->Debug->_screenshot( 'login_page' );
+        $this->Debug->_html( 'login_page' );
+
+        $this->Debug->_debug( "Should be on login button." );
+
         $this->Debug->_debug( "Filling out user and pass." );
         $this->Page->evaluate( "document.querySelector('#username').value = '" . $this->user . "';" );
         $this->Page->evaluate( "document.querySelector('#password').value = '" . $this->pass . "';" );
 
-        // DEBUG
         $this->Debug->_screenshot( 'filled_in_user_pass' );
-        $this->Debug->_screenshot( 'where_i_clicked_to_login', new Clip( 0, 0, self::LOGIN_BUTTON_X, self::LOGIN_BUTTON_Y ) );
+        $this->Debug->_html( 'filled_in_user_pass' );
+        $this->Debug->_screenshot( 'the_login_button', new Clip( 0, 0, self::LOGIN_BUTTON_X, self::LOGIN_BUTTON_Y ) );
 
-
-        // Click the login button, and wait for the page to reload.
         $this->Debug->_debug( "Clicking the login button." );
         $this->Page->mouse()
                    ->move( self::LOGIN_BUTTON_X, self::LOGIN_BUTTON_Y )
                    ->click();
+        sleep(5);
         $this->Page->waitForReload();
 
         $this->Debug->_screenshot( 'am_i_logged_in' );
@@ -80,42 +106,14 @@ class Login {
         $currentUrl = $this->Page->getCurrentUrl();
         $this->Debug->_debug("Currently at: " . $currentUrl);
 
-
-
-//        $this->Debug->_debug( "Navigating to the main interface at " . self::URL_INTERFACE );
-//
-//        $applicationsX = 90;
-//        $applicationsY = 130;
-//
-//        $trustInvestorReportingX = 90;
-//        $trustInvestorReportingY = 164;
-//        $this->Page->mouse()->move($applicationsX,$applicationsY );
-//        $this->Debug->_screenshot( 'first_mouse_move', new Clip( 0, 0, $applicationsX, $applicationsY ) );
-//        sleep(1);
-//
-//        $this->Page->navigate( 'https://trustinvestorreporting.usbank.com/TIR/portal/' )->waitForNavigation(Page::NETWORK_IDLE);
-//
-////        $this->Page->evaluate(
-////            "window.location='/portal/public/openApplication.do?appName=TIR-Ext&appUrl=https://trustinvestorreporting.usbank.com/TIR/portal/';"
-////        );
-////        // This loads a page with additional javascript.
-////        sleep(4);
-//
-//        $this->Debug->_screenshot( 'should_be_the_main_interface' );
-//        $this->Debug->_html( 'should_be_the_main_interface' );
-//        $this->cookies = $this->Page->getAllCookies();
         $postLoginHTML = $this->Page->getHtml();
-//
-//        if ( DeutscheBankBrowser::isForbidden( $postLoginHTML ) ):
-//            throw new \Exception( "US Bank returned Forbidden: Access is denied", 403 );
-//        endif;
-//
-//        $this->csrf = $this->getCSRF( $postLoginHTML );
-//
-//
-//        $this->Debug->_screenshot( "post_login" );
-//        $this->Debug->_html( "post_login" );
-//        $this->Debug->_debug( "CSRF saved to Login object: " . $this->csrf );
+
+        var_dump($postLoginHTML);
+
+        file_put_contents('deleteme.html',$postLoginHTML);
+
+        // TODO Add code to determine if the login was successful.
+
         return $postLoginHTML;
     }
 
