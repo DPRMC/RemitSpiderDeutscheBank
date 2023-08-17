@@ -36,7 +36,7 @@ class RemitSpiderDeutscheBank {
     protected Page $page;
 
 
-    const  BASE_URL                    = 'https://tss.sfs.db.com';
+    const  BASE_URL = 'https://tss.sfs.db.com';
 //    const  PORTFOLIO_IDS_FILENAME      = '_portfolio_ids.json';
 //    const  DEAL_LINK_SUFFIXES_FILENAME = '_deal_link_suffixes.json';
 //    const  HISTORY_LINKS_FILENAME      = '_history_links.json';
@@ -58,16 +58,14 @@ class RemitSpiderDeutscheBank {
 
 
     public function __construct( string $chromePath,
-                                 string $user,
-                                 string $pass,
                                  bool   $debug = FALSE,
                                  string $pathToScreenshots = '',
                                  string $pathToFileDownloads = '',
                                  string $timezone = self::DEFAULT_TIMEZONE
     ) {
 
-        $this->debug                  = $debug;
-        $this->pathToScreenshots      = $pathToScreenshots;
+        $this->debug             = $debug;
+        $this->pathToScreenshots = $pathToScreenshots;
 //        $this->pathToPortfolioIds     = $pathToPortfolioIds . self::PORTFOLIO_IDS_FILENAME;
 //        $this->pathToDealLinkSuffixes = $pathToDealLinkSuffixes . self::DEAL_LINK_SUFFIXES_FILENAME;
 //        $this->pathToHistoryLinks     = $pathToHistoryLinks . self::HISTORY_LINKS_FILENAME;
@@ -85,8 +83,6 @@ class RemitSpiderDeutscheBank {
 
         $this->Login = new Login( $this->DeutscheBankBrowser->page,
                                   $this->Debug,
-                                  $user,
-                                  $pass,
                                   $this->timezone );
 
 //        $this->Portfolios = new Portfolios( $this->DeutscheBankBrowser->page,

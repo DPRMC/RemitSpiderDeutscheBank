@@ -24,7 +24,7 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "php": "^7.2 | ^8.0",
+        "php": "^8.1",
         "guzzlehttp/guzzle": "^7.4",
         "chrome-php/chrome": "^1",
         "ext-dom": "*",

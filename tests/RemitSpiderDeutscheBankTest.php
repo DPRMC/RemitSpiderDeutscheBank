@@ -16,12 +16,10 @@ class RemitSpiderDeutscheBankTest extends TestCase {
 
 
         return new \DPRMC\RemitSpiderDeutscheBank\RemitSpiderDeutscheBank( $_ENV[ 'CHROME_PATH' ],
-                                                              $_ENV[ 'CUSTODIAN_USER' ],
-                                                              $_ENV[ 'CUSTODIAN_PASS' ],
-                                                              self::$debug,
-                                                              '/Users/michaeldrennen/Desktop/files/',
-                                                              '/Users/michaeldrennen/Desktop/files/',
-                                                              self::TIMEZONE );
+                                                                           self::$debug,
+                                                                           $_ENV[ 'PATH_TO_SCREENSHOTS' ],
+                                                                           $_ENV[ 'PATH_TO_DOWNLOADS' ],
+                                                                           self::TIMEZONE );
     }
 
     public static function setUpBeforeClass(): void {
@@ -45,16 +43,35 @@ class RemitSpiderDeutscheBankTest extends TestCase {
 
 
     /**
-         * @test
-         * @group login
-         */
+     * @test
+     * @group login
+     */
     public function testLoginAndLogout() {
+
+        $user          = $_ENV[ 'CUSTODIAN_USER' ];
+        $pass          = $_ENV[ 'CUSTODIAN_PASS' ];
         $spider        = $this->_getSpider();
-        $postLoginHtml = $spider->Login->login();
+        $postLoginHtml = $spider->Login->login( $user, $pass );
+
+        file_put_contents( 'postLogin.html', $postLoginHtml );
         $this->assertIsString( $postLoginHtml );
         $loggedOut = $spider->Login->logout();
         $this->assertTrue( $loggedOut );
     }
+
+
+    /**
+     * @test
+     * @group login
+     */
+    public function testBadLoginShouldThrowException() {
+        $this->expectException( \DPRMC\RemitSpiderDeutscheBank\Exceptions\ExceptionLoginIncorrect::class );
+        $user   = 'poop';
+        $pass   = 'fart';
+        $spider = $this->_getSpider();
+        $spider->Login->login( $user, $pass );
+    }
+
 
 
 

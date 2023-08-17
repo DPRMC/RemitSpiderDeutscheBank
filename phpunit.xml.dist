@@ -22,5 +22,7 @@
         <env name="USER" value="user"/>
         <env name="PASS" value="pass"/>
         <env name="CHROME_PATH" value="/path/to/chromium"/>
+        <env name="PATH_TO_SCREENSHOTS" value="/pathtoscreenshots/"/>
+        <env name="PATH_TO_DOWNLOADS" value="/pathtodownloads/"/>
     </php>
 </phpunit>
