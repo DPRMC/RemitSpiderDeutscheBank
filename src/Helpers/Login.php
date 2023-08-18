@@ -36,8 +36,9 @@ class Login {
     public CookiesCollection $cookies;
 
     public readonly array  $config;
-    public readonly string $refreshToken;
+    public readonly string $bearerToken;
     public readonly array  $token;
+    public readonly array $claims;
 
 
     /**
@@ -77,7 +78,8 @@ class Login {
         sleep( 5 );
 
         $this->_requestAnonymousToken();
-        var_dump( $this->refreshToken );
+        $this->Debug->_debug( "This is the Bearer Token retrieved from _requestAnonymousToken(): " . $this->bearerToken );
+
 
         $this->Debug->_screenshot( 'start_page' );
         $this->Debug->_html( 'start_page' );
@@ -115,8 +117,9 @@ class Login {
         $this->Page->mouse()
                    ->move( self::LOGIN_BUTTON_X, self::LOGIN_BUTTON_Y )
                    ->click();
-        sleep( 5 );
         $this->Page->waitForReload();
+        sleep( 5 );
+
 
         $this->Debug->_screenshot( 'am_i_logged_in' );
         $this->Debug->_html( 'am_i_logged_in' );
@@ -130,26 +133,39 @@ class Login {
             throw new  ExceptionLoginIncorrect( "Login appears to be incorrect. Check for a changed password." );
         endif;
 
+        $this->Debug->_debug( "I appear to be logged in." );
+
+        $this->Debug->_debug( "About to spit out all the cookies." );
+
+        $this->Debug->_debug( "Requesting config route: " . $currentUrl );
         $this->_requestConfig();
+        dump( $this->config );
 
-        print_r( $this->config );
-
+        $this->Debug->_debug( "Requesting token route: " . $currentUrl );
         $this->_requestToken();
+        dump( $this->token );
 
-        print_r( $this->token );
+        $this->Debug->_debug( "Requesting claims route: " . $currentUrl );
+        $this->_requestClaims();
+        dump($this->claims);
 
         return $postLoginHTML;
     }
 
 
+    /**
+     * @return \GuzzleHttp\Cookie\CookieJar
+     * @throws \HeadlessChromium\Exception\CommunicationException
+     * @throws \HeadlessChromium\Exception\NoResponseAvailable
+     * @throws \HeadlessChromium\Exception\OperationTimedOut
+     */
     private function _getCookieJar() {
-        $cookies = $this->Page->getCookies();
+        $cookies = $this->Page->getAllCookies();
 
         // User probably forgot to login first...
         if ( empty( $cookies ) ):
             throw new \Exception( "Cookies were empty for the browser. You probably forgot to login." );
         endif;
-
 
         $cookieArray = [];
         /**
@@ -159,9 +175,15 @@ class Login {
             $cookieArray[ $cookie->getName() ] = $cookie->getValue();
         endforeach;
 
+        if(empty($cookieArray)):
+            $domain = '';
+        else:
+            $domain = $cookie->getDomain();
+        endif;
+
         $jar = \GuzzleHttp\Cookie\CookieJar::fromArray(
             $cookieArray,
-            $cookie->getDomain()
+            $domain
         );
 
         return $jar;
@@ -182,6 +204,11 @@ class Login {
     }
 
 
+    /**
+     * After the initial page load (before being logged in) I need to request an initial "anonymous" token.
+     * @return void
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     protected function _requestAnonymousToken() {
         $client   = new Client();
         $options  = [
@@ -189,8 +216,33 @@ class Login {
         ];
         $response = $client->post( 'https://tss.sfs.db.com/api/v1/authapi/account/anonymoustoken', $options );
 
-        $this->refreshToken = $response->getBody();
+        $this->bearerToken = $response->getBody();
     }
+
+
+    /**
+     * @return void
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    protected function _requestClaims() {
+        $client   = new Client();
+        $jar      = $this->_getCookieJar();
+        $options  = [
+            'cookies'         => $jar,
+            'allow_redirects' => TRUE,
+            'headers'         => [
+                'Authorization' => 'Bearer ' . $this->bearerToken
+            ],
+        ];
+        $response = $client->get( 'https://tss.sfs.db.com/api/v1/authapi/account/claims', $options );
+
+        $json        = $response->getBody();
+        $this->claims = json_decode( $json, TRUE );
+    }
+
+
+
+
 
     protected function _requestToken() {
         $client   = new Client();
@@ -198,13 +250,16 @@ class Login {
         $options  = [
             'form_params'     => [
                 'grant_type'    => 'refresh_token',
-                'refresh_token' => $this->refreshToken,
+                'refresh_token' => $this->bearerToken,
             ],
             'query'           => [
 
             ],
             'cookies'         => $jar,
             'allow_redirects' => TRUE,
+            'headers'         => [
+                'Authorization' => 'Bearer ' . $this->bearerToken
+            ],
         ];
         $response = $client->post( 'https://identity.db.com/auth/realms/global/protocol/openid-connect/token', $options );
 

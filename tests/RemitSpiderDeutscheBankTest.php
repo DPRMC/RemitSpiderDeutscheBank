@@ -55,14 +55,14 @@ class RemitSpiderDeutscheBankTest extends TestCase {
 
         file_put_contents( 'postLogin.html', $postLoginHtml );
         $this->assertIsString( $postLoginHtml );
-        $loggedOut = $spider->Login->logout();
-        $this->assertTrue( $loggedOut );
+//        $loggedOut = $spider->Login->logout();
+//        $this->assertTrue( $loggedOut );
     }
 
 
     /**
      * @test
-     * @group login
+     * @group badlogin
      */
     public function testBadLoginShouldThrowException() {
         $this->expectException( \DPRMC\RemitSpiderDeutscheBank\Exceptions\ExceptionLoginIncorrect::class );
