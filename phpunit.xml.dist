@@ -19,8 +19,8 @@
     </testsuites>
     <logging/>
     <php>
-        <env name="USER" value="user"/>
-        <env name="PASS" value="pass"/>
+        <env name="CUSTODIAN_USER" value="user"/>
+        <env name="CUSTODIAN_PASS" value="pass"/>
         <env name="CHROME_PATH" value="/path/to/chromium"/>
         <env name="PATH_TO_SCREENSHOTS" value="/pathtoscreenshots/"/>
         <env name="PATH_TO_DOWNLOADS" value="/pathtodownloads/"/>
