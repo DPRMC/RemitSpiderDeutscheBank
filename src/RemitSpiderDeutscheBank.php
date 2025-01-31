@@ -3,9 +3,11 @@
 namespace DPRMC\RemitSpiderDeutscheBank;
 
 
+use DPRMC\RemitSpiderDeutscheBank\Helpers\Deals;
 use DPRMC\RemitSpiderDeutscheBank\Helpers\Debug;
 use DPRMC\RemitSpiderDeutscheBank\Helpers\DeutscheBankBrowser;
 use DPRMC\RemitSpiderDeutscheBank\Helpers\Login;
+use GuzzleHttp\Client;
 use HeadlessChromium\Cookies\CookiesCollection;
 use HeadlessChromium\Page;
 
@@ -19,6 +21,10 @@ class RemitSpiderDeutscheBank {
     public DeutscheBankBrowser $DeutscheBankBrowser;
     public Debug               $Debug;
     public Login               $Login;
+
+    public Deals $Deals;
+
+    public Client $guzzle;
 
 
     protected bool   $debug;
@@ -76,6 +82,8 @@ class RemitSpiderDeutscheBank {
         $this->DeutscheBankBrowser = new DeutscheBankBrowser( $chromePath );
         $this->DeutscheBankBrowser->page->setDownloadPath( $pathToFileDownloads );
 
+        $this->guzzle = new Client();
+
         $this->Debug = new Debug( $this->DeutscheBankBrowser->page,
                                   $pathToScreenshots,
                                   $debug,
@@ -85,15 +93,16 @@ class RemitSpiderDeutscheBank {
                                   $this->Debug,
                                   $this->timezone );
 
+        $this->Deals = new Deals( $this->DeutscheBankBrowser->page,
+                                  $this->Debug,
+                                  $this->timezone );
+
 //        $this->Portfolios = new Portfolios( $this->DeutscheBankBrowser->page,
 //                                            $this->Debug,
 //                                            $this->pathToPortfolioIds,
 //                                            $this->timezone );
 //
-//        $this->Deals = new Deals( $this->DeutscheBankBrowser->page,
-//                                  $this->Debug,
-//                                  $this->pathToDealLinkSuffixes,
-//                                  $this->timezone );
+//
 //
 //        $this->HistoryLinks = new HistoryLinks( $this->DeutscheBankBrowser->page,
 //                                                $this->Debug,
@@ -134,6 +143,7 @@ class RemitSpiderDeutscheBank {
 
     /**
      * A little helper function to turn on debugging from the top level object.
+     *
      * @return void
      */
     public function enableDebug(): void {
