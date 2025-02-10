@@ -64,15 +64,40 @@ class RemitSpiderDeutscheBankTest extends TestCase {
      * @group login
      */
     public function testLoginAndLogout() {
+        $user          = $_ENV[ 'CUSTODIAN_USER' ];
+        $pass          = $_ENV[ 'CUSTODIAN_PASS' ];
+        self::$spider  = $this->_getSpider();
+        $postLoginHtml = self::$spider->Login->login( $user, $pass );
+        $this->assertIsString( $postLoginHtml );
+        $this->assertNotEmpty( self::$spider->NetworkListener->accessToken );
+    }
 
+
+    /**
+     * @test
+     * @group do
+     */
+    public function testGetDealOverview(){
         $user          = $_ENV[ 'CUSTODIAN_USER' ];
         $pass          = $_ENV[ 'CUSTODIAN_PASS' ];
         self::$spider  = $this->_getSpider();
         $postLoginHtml = self::$spider->Login->login( $user, $pass );
 
-        file_put_contents( 'postLogin.html', $postLoginHtml );
-        $this->assertIsString( $postLoginHtml );
+        $deal = self::$spider->Deal->getDealOverview(2475);
+
+        print_r(self::$spider->NetworkListener->requests);
+
+        print_r($deal->mostRecentFactors);
+        print_r($deal->latestReportsPerType);
+
+        $this->assertIsArray($deal->mostRecentFactors);
+        $this->assertIsArray($deal->latestReportsPerType);
+
+        $this->assertNotEmpty($deal->mostRecentFactors);
+        $this->assertNotEmpty($deal->latestReportsPerType);
     }
+
+
 
 
     /**
@@ -82,10 +107,24 @@ class RemitSpiderDeutscheBankTest extends TestCase {
     public function testGetSomeDeals() {
 
 
-        self::$spider->Login->login( $_ENV[ 'CUSTODIAN_USER' ], $_ENV[ 'CUSTODIAN_PASS' ] );
+        //$html = self::$spider->Login->login( $_ENV[ 'CUSTODIAN_USER' ], $_ENV[ 'CUSTODIAN_PASS' ] );
+        //
+        //$this->assertIsString( $html );
+        //
+        //$deals = self::$spider->Deals->getDeals();
 
 
-        self::$spider->Deals->getDeals();
+
+
+
+        $deals = self::$spider->Deals->getDealsWhenLoggedOut();
+
+
+        $this->assertIsArray( $deals );
+        $this->assertGreaterThan( 0, count( $deals ) );
+
+
+        file_put_contents( '/Users/michaeldrennen/PhpstormProjects/DPRMC/RemitSpiderDeutscheBank/tests/temp_files/deals.json', json_encode( $deals ) );
 
         //$this->handler = function (array $params): void {
         //    $url = @$params["response"]["url"];
