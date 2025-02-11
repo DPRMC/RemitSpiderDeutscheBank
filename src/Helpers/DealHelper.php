@@ -164,16 +164,7 @@ class DealHelper {
 
 
 
-    //public function getHttpNetworkRequestUrlsByDealId( int $dealId ): array {
-    //    $dealIdUrls = [];
-    //    $httpUrls   = $this->getHttpNetworkRequestUrls();
-    //    foreach ( $httpUrls as $url ):
-    //        if ( str_contains( $url, '/' . $dealId ) ):
-    //            $dealIdUrls[] = $url;
-    //        endif;
-    //    endforeach;
-    //    return $dealIdUrls;
-    //}
+
 
     //protected function _getRequestByUrl( string $url ): array {
     //    /**
