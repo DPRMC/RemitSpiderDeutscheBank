@@ -32,7 +32,7 @@ class RemitSpiderDeutscheBank {
 
     public Deals $Deals;
 
-    public DealHelper $Deal;
+    public DealHelper $DealHelper;
 
 
     public Client $guzzle;
@@ -105,10 +105,10 @@ class RemitSpiderDeutscheBank {
                                   $this->Debug,
                                   $this->timezone );
 
-        $this->Deal = new DealHelper( $this->DeutscheBankBrowser->page,
-                                      $this->NetworkListener,
-                                      $this->Debug,
-                                      $this->timezone );
+        $this->DealHelper = new DealHelper( $this->DeutscheBankBrowser->page,
+                                            $this->NetworkListener,
+                                            $this->Debug,
+                                            $this->timezone );
 
 
         $this->NetworkListener->enableListener();

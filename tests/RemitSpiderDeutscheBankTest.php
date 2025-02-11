@@ -83,7 +83,7 @@ class RemitSpiderDeutscheBankTest extends TestCase {
         self::$spider  = $this->_getSpider();
         $postLoginHtml = self::$spider->Login->login( $user, $pass );
 
-        $deal = self::$spider->Deal->getDealOverview(2475);
+        $deal = self::$spider->DealHelper->getDealOverview( 2475);
 
         print_r(self::$spider->NetworkListener->requests);
 
