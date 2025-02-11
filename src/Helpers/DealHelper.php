@@ -12,10 +12,22 @@ use HeadlessChromium\Page;
 
 
 /**
+ * 0 => "https://tss.sfs.db.com/deal/2475/overview"
  *
+ * API REQUESTS
+ * 1 => "https://tss.sfs.db.com/api/v1/dealapi/deal/2475"
+ * 2 => "https://tss.sfs.db.com/api/v1/dealapi/deal/2475/userentitlements"
+ * 3 => "https://tss.sfs.db.com/api/v1/dealapi/deal/2475/reportTypes"
+ * 4 => "https://tss.sfs.db.com/api/v1/dealapi/factors/2475/BondSummary"
+ * 5 => "https://tss.sfs.db.com/api/v1/dealapi/factors/2475/factorsmostrecent"
+ * 6 => "https://tss.sfs.db.com/api/v1/dealapi/deal/2475/latestreportspertype"
+ * 7 => "https://tss.sfs.db.com/api/v1/dealapi/factors/2475/factordates"
+ * 8 => "https://tss.sfs.db.com/api/v1/dealapi/deal/2475/reports"
+ * 9 => "https://tss.sfs.db.com/api/v1/dealapi/factors/2475/factorsperrange/?fromDate=2025-01-01&toDate=2025-01-31"
  */
 class DealHelper {
 
+    use RequestTrait;
 
     protected Page            $Page;
     protected NetworkListener $NetworkListener;
@@ -51,55 +63,11 @@ class DealHelper {
     }
 
 
-    /**
-     * @return array
-     */
-    public function getNetworkRequestUrls(): array {
-        $urls = [];
-
-        $requests = $this->NetworkListener->requests;
-        foreach ( $requests as $requestCounter => $request ):
-            $url                     = $request[ 'params' ][ 'response' ][ 'url' ];
-            $urls[ $requestCounter ] = $url;
-        endforeach;
-
-        return $urls;
-    }
 
 
-    /**
-     * There are a bunch of data requests, for images and such.
-     * Right now I just need the http(s) requests
-     *
-     * @return array
-     */
-    public function getHttpNetworkRequestUrls(): array {
-        $urls     = $this->getNetworkRequestUrls();
-        $httpUrls = [];
-        foreach ( $urls as $url ):
-            if ( str_starts_with( $url, 'http' ) ):
-                $httpUrls[] = $url;
-            endif;
-        endforeach;
-        return $httpUrls;
-    }
 
 
-    /**
-     * @param int $dealId
-     *
-     * @return array
-     */
-    public function getHttpNetworkRequestUrlsByDealId( int $dealId ): array {
-        $dealIdUrls = [];
-        $httpUrls   = $this->getHttpNetworkRequestUrls();
-        foreach ( $httpUrls as $url ):
-            if ( str_contains( $url, '/' . $dealId ) ):
-                $dealIdUrls[] = $url;
-            endif;
-        endforeach;
-        return $dealIdUrls;
-    }
+
 
 
     /**
@@ -147,21 +115,21 @@ class DealHelper {
 
         $deal = new Deal();
 
-        try {
-            $deal->mostRecentFactors = $this->_getMostRecentFactors( $dealId );
-        } catch ( \Exception $e ) {
-            $deal->mostRecentFactors = [];
-            $this->Debug->_debug( $e->getMessage() );
-            $Deal->_addException( $e );
-        }
-
-        try {
-            $deal->latestReportsPerType = $this->_getLatestReportsPerType( $dealId );
-        } catch ( \Exception $e ) {
-            $deal->latestReportsPerType = [];
-            $this->Debug->_debug( $e->getMessage() );
-            $Deal->_addException( $e );
-        }
+        //try {
+        //    $deal->mostRecentFactors = $this->_getMostRecentFactors( $dealId );
+        //} catch ( \Exception $e ) {
+        //    $deal->mostRecentFactors = [];
+        //    $this->Debug->_debug( $e->getMessage() );
+        //    $Deal->_addException( $e );
+        //}
+        //
+        //try {
+        //    $deal->latestReportsPerType = $this->_getLatestReportsPerType( $dealId );
+        //} catch ( \Exception $e ) {
+        //    $deal->latestReportsPerType = [];
+        //    $this->Debug->_debug( $e->getMessage() );
+        //    $Deal->_addException( $e );
+        //}
 
 
         $this->Debug->_debug( 'Returning the completed deal object.' );
@@ -169,24 +137,17 @@ class DealHelper {
     }
 
 
+
+
     /**
-     * @param string $url
+     * @param int    $dealId
+     * @param string $bearerToken
      *
      * @return array
-     * @throws \Exception
      */
-    protected function _getRequestByUrl( string $url ): array {
-        /**
-         * @var array $request
-         */
-        foreach ( $this->NetworkListener->requests as $requestCounter => $request ):
-            $requestUrl = $request[ 'params' ][ 'response' ][ 'url' ];
-            if ( $url === $requestUrl ):
-                return $request;
-            endif;
-        endforeach;
-
-        throw new \Exception( "Unable to find the request with this URL: " . $url );
+    public function apiGetMostRecentFactors( int $dealId, string $bearerToken ): array {
+        $url = 'https://tss.sfs.db.com/api/v1/dealapi/factors/' . $dealId . '/factorsmostrecent';
+        return $this->_guzzleRequestJson( $url, $bearerToken, 'GET' );
     }
 
 
@@ -195,61 +156,63 @@ class DealHelper {
      * @param string $bearerToken
      *
      * @return array
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function apiGetMostRecentFactors( int $dealId, string $bearerToken ): array {
-        $url = 'https://tss.sfs.db.com/api/v1/dealapi/factors/' . $dealId . '/factorsmostrecent';
-
-        $client   = new Client();
-        $response = $client->request( 'GET', $url, [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $bearerToken,
-            ],
-        ] );
-
-
-        $body = $response->getBody()->getContents();
-        $factors = json_decode( $body, TRUE );
-
-        return $factors;
+    public function apiGetLatestReportsPerType( int $dealId, string $bearerToken ): array {
+        $url = 'https://tss.sfs.db.com/api/v1/dealapi/deal/' . $dealId . '/latestreportspertype';
+        return $this->_guzzleRequestJson( $url, $bearerToken, 'POST' );
     }
 
 
-    /**
-     * @param int $dealId
-     *
-     * @return array
-     * @throws \Exception
-     */
-    protected function _getMostRecentFactors( int $dealId ): array {
-        $url = 'https://tss.sfs.db.com/api/v1/dealapi/factors/' . $dealId . '/factorsmostrecent';
-        $this->Debug->_debug( "Searching through all (" . count( $this->NetworkListener->requests ) . ") network requests for the URL: " . $url );
-        $request = $this->_getRequestByUrl( $url );
 
-        dump( $request );
+    //public function getHttpNetworkRequestUrlsByDealId( int $dealId ): array {
+    //    $dealIdUrls = [];
+    //    $httpUrls   = $this->getHttpNetworkRequestUrls();
+    //    foreach ( $httpUrls as $url ):
+    //        if ( str_contains( $url, '/' . $dealId ) ):
+    //            $dealIdUrls[] = $url;
+    //        endif;
+    //    endforeach;
+    //    return $dealIdUrls;
+    //}
 
-        $body    = @$request[ 'data' ][ 'result' ][ 'body' ];
-        $factors = @json_decode( $body, TRUE );
-        return $factors ?? [];
-    }
+    //protected function _getRequestByUrl( string $url ): array {
+    //    /**
+    //     * @var array $request
+    //     */
+    //    foreach ( $this->NetworkListener->requests as $requestCounter => $request ):
+    //        $requestUrl = $request[ 'params' ][ 'response' ][ 'url' ];
+    //        if ( $url === $requestUrl ):
+    //            return $request;
+    //        endif;
+    //    endforeach;
+    //
+    //    throw new \Exception( "Unable to find the request with this URL: " . $url );
+    //}
 
-
-    /**
-     * @param int $dealId
-     *
-     * @return array
-     * @throws \Exception
-     */
-    protected function _getLatestReportsPerType( int $dealId ): array {
-        $url     = 'https://tss.sfs.db.com/api/v1/dealapi/deal/' . $dealId . '/latestreportspertype';
-        $request = $this->_getRequestByUrl( $url );
-
-        dump( $request );
-
-        $body                 = @$request[ 'data' ][ 'result' ][ 'body' ];
-        $latestReportsPerType = @json_decode( $body, TRUE );
-        return $latestReportsPerType ?? [];
-    }
+    //protected function _getMostRecentFactors( int $dealId ): array {
+    //    $url = 'https://tss.sfs.db.com/api/v1/dealapi/factors/' . $dealId . '/factorsmostrecent';
+    //    $this->Debug->_debug( "Searching through all (" . count( $this->NetworkListener->requests ) . ") network requests for the URL: " . $url );
+    //    $request = $this->_getRequestByUrl( $url );
+    //
+    //    dump( $request );
+    //
+    //    $body    = @$request[ 'data' ][ 'result' ][ 'body' ];
+    //    $factors = @json_decode( $body, TRUE );
+    //    return $factors ?? [];
+    //}
+    //
+    //
+    //
+    //protected function _getLatestReportsPerType( int $dealId ): array {
+    //    $url     = 'https://tss.sfs.db.com/api/v1/dealapi/deal/' . $dealId . '/latestreportspertype';
+    //    $request = $this->_getRequestByUrl( $url );
+    //
+    //    dump( $request );
+    //
+    //    $body                 = @$request[ 'data' ][ 'result' ][ 'body' ];
+    //    $latestReportsPerType = @json_decode( $body, TRUE );
+    //    return $latestReportsPerType ?? [];
+    //}
 
 
 }
