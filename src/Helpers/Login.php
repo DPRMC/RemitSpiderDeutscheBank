@@ -132,6 +132,8 @@ class Login {
         $this->Debug->_screenshot( "4_am_i_logged_in" );
         $this->Debug->_html( "4_am_i_logged_in" );
 
+        $this->Debug->_debug("Should be logged in now.");
+
         return $this->Page->getHtml();
     }
 
