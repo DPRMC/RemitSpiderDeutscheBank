@@ -191,6 +191,31 @@ class DealHelper {
 
 
     /**
+     * @param int    $dealId
+     * @param string $bearerToken
+     *
+     * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function apiGetMostRecentFactors( int $dealId, string $bearerToken ): array {
+        $url = 'https://tss.sfs.db.com/api/v1/dealapi/factors/' . $dealId . '/factorsmostrecent';
+
+        $client   = new Client();
+        $response = $client->request( 'GET', $url, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $bearerToken,
+            ],
+        ] );
+
+
+        $body = $response->getBody()->getContents();
+        $factors = json_decode( $body, TRUE );
+
+        return $factors;
+    }
+
+
+    /**
      * @param int $dealId
      *
      * @return array
@@ -201,7 +226,7 @@ class DealHelper {
         $this->Debug->_debug( "Searching through all (" . count( $this->NetworkListener->requests ) . ") network requests for the URL: " . $url );
         $request = $this->_getRequestByUrl( $url );
 
-        dump($request);
+        dump( $request );
 
         $body    = @$request[ 'data' ][ 'result' ][ 'body' ];
         $factors = @json_decode( $body, TRUE );
@@ -216,10 +241,10 @@ class DealHelper {
      * @throws \Exception
      */
     protected function _getLatestReportsPerType( int $dealId ): array {
-        $url                  = 'https://tss.sfs.db.com/api/v1/dealapi/deal/' . $dealId . '/latestreportspertype';
-        $request              = $this->_getRequestByUrl( $url );
+        $url     = 'https://tss.sfs.db.com/api/v1/dealapi/deal/' . $dealId . '/latestreportspertype';
+        $request = $this->_getRequestByUrl( $url );
 
-        dump($request);
+        dump( $request );
 
         $body                 = @$request[ 'data' ][ 'result' ][ 'body' ];
         $latestReportsPerType = @json_decode( $body, TRUE );
