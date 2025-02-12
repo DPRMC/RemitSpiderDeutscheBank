@@ -151,6 +151,13 @@ class DealHelper {
     }
 
 
+    // https://tss.sfs.db.com/api/v1/dealapi/factors/2475/BondSummary
+    public function apiGetBondSummary( int $dealId, string $bearerToken ): array {
+        $url = 'https://tss.sfs.db.com/api/v1/dealapi/factors/' . $dealId . '/BondSummary';
+        return $this->_guzzleRequestJson( $url, $bearerToken, 'GET' );
+    }
+
+
     /**
      * @param int    $dealId
      * @param string $bearerToken
@@ -172,6 +179,7 @@ class DealHelper {
                                        $bearerToken,
                                        $body );
     }
+
 
 
 
