@@ -159,7 +159,18 @@ class DealHelper {
      */
     public function apiGetLatestReportsPerType( int $dealId, string $bearerToken ): array {
         $url = 'https://tss.sfs.db.com/api/v1/dealapi/deal/' . $dealId . '/latestreportspertype';
-        return $this->_guzzleRequestJson( $url, $bearerToken, 'POST' );
+
+        // {"limit":30,"reportCategories":[2],"excludeReportCategories":true,"orderBy":"reportDate DESC, description ASC"}
+        $payload = [
+            'limit' => 30,
+            'reportCategories' => [2],
+            'excludeReportCategories' => true,
+            'orderBy' => 'reportDate DESC, description ASC',
+        ];
+        $body    = json_encode( $payload );
+        return $this->_guzzlePostJson( $url,
+                                       $bearerToken,
+                                       $body );
     }
 
 

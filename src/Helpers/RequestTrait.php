@@ -51,12 +51,15 @@ trait RequestTrait {
     }
 
 
-
     protected function _guzzleRequest( string $url, string $bearerToken, string $method = 'GET' ): string {
-        $client   = new Client();
+        $client = new Client();
+        $options = [];
+
         $response = $client->request( $method, $url, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $bearerToken,
+                'Content-Type'  => 'application/json;charset=utf-8',
+                'Accept'        => 'application/json',
             ],
         ] );
         return $response->getBody()->getContents();
@@ -64,8 +67,29 @@ trait RequestTrait {
 
 
     protected function _guzzleRequestJson( string $url, string $bearerToken, string $method = 'GET' ): array {
-        $body     = $this->_guzzleRequest( $url, $bearerToken, $method );
+        $body = $this->_guzzleRequest( $url, $bearerToken, $method );
         return json_decode( $body, TRUE );
     }
+
+
+    protected function _guzzlePostJson( string $url, string $bearerToken, string $body ): array {
+        $client = new Client();
+        $options = [];
+
+        $response = $client->request( 'POST', $url, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $bearerToken,
+                'Content-Type'  => 'application/json;charset=utf-8',
+                'Accept'        => 'application/json',
+            ],
+            'body'    => $body,
+        ] );
+        $contents = $response->getBody()->getContents();
+        return json_decode( $contents, TRUE );
+    }
+
+
+
+
 
 }
