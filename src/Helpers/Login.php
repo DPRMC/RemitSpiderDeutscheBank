@@ -3,20 +3,21 @@
 namespace DPRMC\RemitSpiderDeutscheBank\Helpers;
 
 
-use DPRMC\RemitSpiderDeutscheBank\Exceptions\ExceptionLoginIncorrect;
 use DPRMC\RemitSpiderDeutscheBank\RemitSpiderDeutscheBank;
 use GuzzleHttp\Client;
-use HeadlessChromium\Clip;
 use HeadlessChromium\Cookies\CookiesCollection;
 use HeadlessChromium\Page;
-use Psr\Http\Message\ResponseInterface;
+
 
 /**
  *
  */
 class Login {
 
-    const URL_LOGIN  = 'https://tss.sfs.db.com/search';
+    // https://identity.db.com/auth/realms/global/protocol/openid-connect/auth?client_id=account&redirect_uri=https%3A%2F%2Fidentity.db.com%2Fauth%2Frealms%2Fglobal%2Faccount%2Flogin-redirect&state=0%2F7a54a783-53bd-4ee2-8aa7-1f37f2490c9d&response_type=code&scope=openid
+
+
+    const URL_LOGIN  = 'https://tss.sfs.db.com';
     const URL_LOGOUT = 'https://identity.db.com/auth/realms/global/protocol/openid-connect/logout';
 
     const LOGIN_LINK_BUTTON_Y = 140;
@@ -28,9 +29,10 @@ class Login {
 
 //    const URL_INTERFACE = RemitSpiderDeutscheBank::BASE_URL . '/TIR/public/deals';
 
-    protected Page   $Page;
-    protected Debug  $Debug;
-    protected string $timezone;
+    protected Page         $Page;
+    public NetworkListener $NetworkListener;
+    protected Debug        $Debug;
+    protected string       $timezone;
 
     public ?string           $csrf = NULL;
     public CookiesCollection $cookies;
@@ -38,20 +40,23 @@ class Login {
     public readonly array  $config;
     public readonly string $bearerToken;
     public readonly array  $token;
-    public readonly array $claims;
+    public readonly array  $claims;
 
 
     /**
-     * @param Page $Page
-     * @param Debug $Debug
-     * @param string $timezone
+     * @param \HeadlessChromium\Page                                 $Page
+     * @param \DPRMC\RemitSpiderDeutscheBank\Helpers\NetworkListener $NetworkListener
+     * @param \DPRMC\RemitSpiderDeutscheBank\Helpers\Debug           $Debug
+     * @param string                                                 $timezone
      */
-    public function __construct( Page   &$Page,
-                                 Debug  &$Debug,
+    public function __construct( Page            &$Page,
+                                 NetworkListener &$NetworkListener,
+                                 Debug           &$Debug,
 
-                                 string $timezone = RemitSpiderDeutscheBank::DEFAULT_TIMEZONE ) {
-        $this->Page  = $Page;
-        $this->Debug = $Debug;
+                                 string          $timezone = RemitSpiderDeutscheBank::DEFAULT_TIMEZONE ) {
+        $this->Page            = $Page;
+        $this->NetworkListener = $NetworkListener;
+        $this->Debug           = $Debug;
 
         $this->timezone = $timezone;
     }
@@ -60,13 +65,15 @@ class Login {
     /**
      * @param string $user
      * @param string $pass
+     *
      * @return string
-     * @throws ExceptionLoginIncorrect
      * @throws \HeadlessChromium\Exception\CommunicationException
      * @throws \HeadlessChromium\Exception\CommunicationException\CannotReadResponse
      * @throws \HeadlessChromium\Exception\CommunicationException\InvalidResponse
      * @throws \HeadlessChromium\Exception\CommunicationException\ResponseHasError
+     * @throws \HeadlessChromium\Exception\ElementNotFoundException
      * @throws \HeadlessChromium\Exception\FilesystemException
+     * @throws \HeadlessChromium\Exception\JavascriptException
      * @throws \HeadlessChromium\Exception\NavigationExpired
      * @throws \HeadlessChromium\Exception\NoResponseAvailable
      * @throws \HeadlessChromium\Exception\OperationTimedOut
@@ -74,82 +81,60 @@ class Login {
      */
     public function login( string $user, string $pass ): string {
         $this->Debug->_debug( "Navigating to login screen at: " . self::URL_LOGIN );
+
+        //$this->Page->getSession()->on( 'method:Network.responseReceived', function ( array $params ): void {
+        //    $request_id = @$params[ "requestId" ];
+        //    $data       = @$this->Page->getSession()->sendMessageSync( new \HeadlessChromium\Communication\Message( 'Network.getResponseBody', [ 'requestId' => $request_id ] ) )->getData();
+        //
+        //    // START DEBUG
+        //    $filepath     = '/Users/michaeldrennen/PhpstormProjects/DPRMC/RemitSpiderDeutscheBank/tests/temp_files/login_params_' . md5( json_encode( $data ) ) . '.txt';
+        //    $prettyParams = print_r( $params, TRUE );
+        //    $written      = file_put_contents( $filepath, $prettyParams );
+        //
+        //    $filepath   = '/Users/michaeldrennen/PhpstormProjects/DPRMC/RemitSpiderDeutscheBank/tests/temp_files/login_data_' . md5( json_encode( $data ) ) . '.txt';
+        //    $prettyData = print_r( $data, TRUE );
+        //    $written    = file_put_contents( $filepath, $prettyData );
+        //    // END DEBUG
+        //
+        //
+        //    if ( $this->_isRequestThatHasTheAccessToken( $params, $data ) ):
+        //        $anonymousAccessToken = @$data[ "result" ][ "body" ];
+        //
+        //        $this->accessToken = $anonymousAccessToken;
+        //    endif;
+        //} );
+
+
         $this->Page->navigate( self::URL_LOGIN )->waitForNavigation( Page::NETWORK_IDLE );
-        sleep( 5 );
+        //sleep( 5 );
 
-        $this->_requestAnonymousToken();
-        $this->Debug->_debug( "This is the Bearer Token retrieved from _requestAnonymousToken(): " . $this->bearerToken );
+        $this->Debug->_screenshot( "1_home_page" );
+        $this->Debug->_html( "1_home_page" );
 
-
-        $this->Debug->_screenshot( 'start_page' );
-        $this->Debug->_html( 'start_page' );
-
-        $this->Debug->_debug( "Deleting the overlay" );
-        $this->Page->evaluate( "document.querySelector('.jss338').remove();" );
-
-        $this->Debug->_screenshot( 'page_without_overlay' );
-        $this->Debug->_html( 'page_without_overlay' );
-
-        $this->Debug->_debug( "Clicking Login button." );
-
-        $this->Debug->_screenshot( 'where_i_clicked_to_login', new Clip( 0, 0, self::LOGIN_LINK_BUTTON_X, self::LOGIN_LINK_BUTTON_Y ) );
-
-        $this->Page->mouse()
-                   ->move( self::LOGIN_LINK_BUTTON_X, self::LOGIN_LINK_BUTTON_Y )
-                   ->click();
+        $this->Page->mouse()->find( 'button.jss98' )->click();
 
         $this->Page->waitForReload();
 
-        $this->Debug->_screenshot( 'login_page' );
-        $this->Debug->_html( 'login_page' );
+        $this->Debug->_screenshot( "2_login_page" );
+        $this->Debug->_html( "2_login_page" );
 
-        $this->Debug->_debug( "Should be on login button." );
-
-        $this->Debug->_debug( "Filling out user and pass." );
         $this->Page->evaluate( "document.querySelector('#username').value = '" . $user . "';" );
         $this->Page->evaluate( "document.querySelector('#password').value = '" . $pass . "';" );
 
-        $this->Debug->_screenshot( 'filled_in_user_pass' );
-        $this->Debug->_html( 'filled_in_user_pass' );
-        $this->Debug->_screenshot( 'the_login_button', new Clip( 0, 0, self::LOGIN_BUTTON_X, self::LOGIN_BUTTON_Y ) );
+        $this->Debug->_screenshot( "3_filled_in_login_page" );
+        $this->Debug->_html( "3_filled_in_login_page" );
 
-        $this->Debug->_debug( "Clicking the login button." );
-        $this->Page->mouse()
-                   ->move( self::LOGIN_BUTTON_X, self::LOGIN_BUTTON_Y )
-                   ->click();
+        $this->Page->mouse()->find( '#kc-login' )->click();
         $this->Page->waitForReload();
+
         sleep( 5 );
 
+        $this->Debug->_screenshot( "4_am_i_logged_in" );
+        $this->Debug->_html( "4_am_i_logged_in" );
 
-        $this->Debug->_screenshot( 'am_i_logged_in' );
-        $this->Debug->_html( 'am_i_logged_in' );
+        $this->Debug->_debug("Should be logged in now.");
 
-        $currentUrl = $this->Page->getCurrentUrl();
-        $this->Debug->_debug( "Currently at: " . $currentUrl );
-
-        $postLoginHTML = $this->Page->getHtml();
-
-        if ( str_contains( $postLoginHTML, 'Please check your entries' ) ):
-            throw new  ExceptionLoginIncorrect( "Login appears to be incorrect. Check for a changed password." );
-        endif;
-
-        $this->Debug->_debug( "I appear to be logged in." );
-
-        $this->Debug->_debug( "About to spit out all the cookies." );
-
-        $this->Debug->_debug( "Requesting config route: " . $currentUrl );
-        $this->_requestConfig();
-        dump( $this->config );
-
-        $this->Debug->_debug( "Requesting token route: " . $currentUrl );
-        $this->_requestToken();
-        dump( $this->token );
-
-        $this->Debug->_debug( "Requesting claims route: " . $currentUrl );
-        $this->_requestClaims();
-        dump($this->claims);
-
-        return $postLoginHTML;
+        return $this->Page->getHtml();
     }
 
 
@@ -175,7 +160,7 @@ class Login {
             $cookieArray[ $cookie->getName() ] = $cookie->getValue();
         endforeach;
 
-        if(empty($cookieArray)):
+        if ( empty( $cookieArray ) ):
             $domain = '';
         else:
             $domain = $cookie->getDomain();
@@ -190,136 +175,18 @@ class Login {
     }
 
 
-    protected function _requestConfig() {
-        $client   = new Client();
-        $jar      = $this->_getCookieJar();
-        $options  = [
-            'cookies'         => $jar,
-            'allow_redirects' => TRUE,
-        ];
-        $response = $client->get( 'https://tss.sfs.db.com/api/v1/authapi/config', $options );
-
-        $json         = $response->getBody();
-        $this->config = json_decode( $json, TRUE );
-    }
-
-
-    /**
-     * After the initial page load (before being logged in) I need to request an initial "anonymous" token.
-     * @return void
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    protected function _requestAnonymousToken() {
-        $client   = new Client();
-        $options  = [
-            'allow_redirects' => TRUE,
-        ];
-        $response = $client->post( 'https://tss.sfs.db.com/api/v1/authapi/account/anonymoustoken', $options );
-
-        $this->bearerToken = $response->getBody();
-    }
-
-
-    /**
-     * @return void
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    protected function _requestClaims() {
-        $client   = new Client();
-        $jar      = $this->_getCookieJar();
-        $options  = [
-            'cookies'         => $jar,
-            'allow_redirects' => TRUE,
-            'headers'         => [
-                'Authorization' => 'Bearer ' . $this->bearerToken
-            ],
-        ];
-        $response = $client->get( 'https://tss.sfs.db.com/api/v1/authapi/account/claims', $options );
-
-        $json        = $response->getBody();
-        $this->claims = json_decode( $json, TRUE );
-    }
-
-
-
-
-
-    protected function _requestToken() {
-        $client   = new Client();
-        $jar      = $this->_getCookieJar();
-        $options  = [
-            'form_params'     => [
-                'grant_type'    => 'refresh_token',
-                'refresh_token' => $this->bearerToken,
-            ],
-            'query'           => [
-
-            ],
-            'cookies'         => $jar,
-            'allow_redirects' => TRUE,
-            'headers'         => [
-                'Authorization' => 'Bearer ' . $this->bearerToken
-            ],
-        ];
-        $response = $client->post( 'https://identity.db.com/auth/realms/global/protocol/openid-connect/token', $options );
-
-        $json        = $response->getBody();
-        $this->token = json_decode( $json, TRUE );
-    }
-
-    //
-
-
-    /**
-     * @return bool
-     * @throws \HeadlessChromium\Exception\CommunicationException
-     * @throws \HeadlessChromium\Exception\CommunicationException\CannotReadResponse
-     * @throws \HeadlessChromium\Exception\CommunicationException\InvalidResponse
-     * @throws \HeadlessChromium\Exception\CommunicationException\ResponseHasError
-     * @throws \HeadlessChromium\Exception\FilesystemException
-     * @throws \HeadlessChromium\Exception\NavigationExpired
-     * @throws \HeadlessChromium\Exception\NoResponseAvailable
-     * @throws \HeadlessChromium\Exception\OperationTimedOut
-     * @throws \HeadlessChromium\Exception\ScreenshotFailed
-     */
-    public function logout(): bool {
-        $this->Page->navigate( self::URL_LOGOUT )->waitForNavigation();
-        $this->Debug->_screenshot( 'loggedout' );
-        return TRUE;
-    }
-
-
-    /**
-     * @param string $html
-     *
-     * @return string
-     * @throws \Exception
-     */
-    protected function getCSRF( string $html ): string {
-        $dom = new \DOMDocument();
-        @$dom->loadHTML( $html );
-        $inputs = $dom->getElementsByTagName( 'input' );
-        foreach ( $inputs as $input ):
-            $id = $input->getAttribute( 'id' );
-
-            // This is the one we want!
-            if ( 'OWASP_CSRFTOKEN' == $id ):
-                return $input->getAttribute( 'value' );
-            endif;
-        endforeach;
-
-        // Secondary Search if first was unfruitful. I have been getting some errors.
-        // This regex search is looing for:
-        // xhr.setRequestHeader('OWASP_CSRFTOKEN', 'AAAA-BBBB-CCCC-DDDD-EEEE-FFFF-GGGG-HHHH');
-        //$pattern = "/'OWASP_CSRFTOKEN', '(.*)'\);/";
-        $pattern = '/([A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4})/';
-        $matches = [];
-        $success = preg_match( $pattern, $html, $matches );
-        if ( 1 === $success ):
-            return $matches[ 1 ];
+    // https://identity.db.com/auth/realms/global/protocol/openid-connect/token
+    protected function _isRequestThatHasTheAccessToken( array $params = [], string $data = '' ): bool {
+        $jsonData = json_decode( $data, TRUE );
+        if ( is_null( $jsonData ) ):
+            return FALSE;
         endif;
 
-        throw new \Exception( "Unable to find the CSRF value in the HTML." );
+        if ( isset( $jsonData[ 'access_token' ] ) ):
+            return TRUE;
+        endif;
+
+        return FALSE;
     }
 
 }
